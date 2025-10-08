@@ -7,10 +7,21 @@ export const themes = {
   dengi_market: {
     id: 'dengi_market',
     name: 'Денги Маркет',
-    canvas: { 
-      width: 1080, 
-      height: 1080, 
-      background: '#FFFFFF' 
+    canvas: {
+      formats: {
+        square: { width: 1080, height: 1080 },
+        portrait: { width: 1080, height: 1350 }
+      },
+      defaultFormat: 'square',
+      background: '#FFFFFF',
+      get width() {
+        const format = this.formats[this.defaultFormat];
+        return format?.width ?? 1080;
+      },
+      get height() {
+        const format = this.formats[this.defaultFormat];
+        return format?.height ?? 1080;
+      }
     },
     fonts: {
       header: { 
@@ -52,10 +63,21 @@ export const themes = {
   minimal: {
     id: 'minimal',
     name: 'Минимализм',
-    canvas: { 
-      width: 1080, 
-      height: 1080, 
-      background: '#F5F5F5' 
+    canvas: {
+      formats: {
+        square: { width: 1080, height: 1080 },
+        portrait: { width: 1080, height: 1350 }
+      },
+      defaultFormat: 'square',
+      background: '#F5F5F5',
+      get width() {
+        const format = this.formats[this.defaultFormat];
+        return format?.width ?? 1080;
+      },
+      get height() {
+        const format = this.formats[this.defaultFormat];
+        return format?.height ?? 1080;
+      }
     },
     fonts: {
       header: { 
@@ -97,10 +119,21 @@ export const themes = {
   vibrant: {
     id: 'vibrant',
     name: 'Яркий',
-    canvas: { 
-      width: 1080, 
-      height: 1080, 
-      background: '#FFFFFF' 
+    canvas: {
+      formats: {
+        square: { width: 1080, height: 1080 },
+        portrait: { width: 1080, height: 1350 }
+      },
+      defaultFormat: 'square',
+      background: '#FFFFFF',
+      get width() {
+        const format = this.formats[this.defaultFormat];
+        return format?.width ?? 1080;
+      },
+      get height() {
+        const format = this.formats[this.defaultFormat];
+        return format?.height ?? 1080;
+      }
     },
     fonts: {
       header: { 
@@ -142,10 +175,21 @@ export const themes = {
   dark: {
     id: 'dark',
     name: 'Тёмный',
-    canvas: { 
-      width: 1080, 
-      height: 1080, 
-      background: '#1A202C' 
+    canvas: {
+      formats: {
+        square: { width: 1080, height: 1080 },
+        portrait: { width: 1080, height: 1350 }
+      },
+      defaultFormat: 'square',
+      background: '#1A202C',
+      get width() {
+        const format = this.formats[this.defaultFormat];
+        return format?.width ?? 1080;
+      },
+      get height() {
+        const format = this.formats[this.defaultFormat];
+        return format?.height ?? 1080;
+      }
     },
     fonts: {
       header: { 
@@ -187,10 +231,21 @@ export const themes = {
   gradient: {
     id: 'gradient',
     name: 'Градиент',
-    canvas: { 
-      width: 1080, 
-      height: 1080, 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+    canvas: {
+      formats: {
+        square: { width: 1080, height: 1080 },
+        portrait: { width: 1080, height: 1350 }
+      },
+      defaultFormat: 'square',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      get width() {
+        const format = this.formats[this.defaultFormat];
+        return format?.width ?? 1080;
+      },
+      get height() {
+        const format = this.formats[this.defaultFormat];
+        return format?.height ?? 1080;
+      }
     },
     fonts: {
       header: { 
@@ -277,6 +332,16 @@ export class ThemeSystem {
         badge: theme.colors.badge
       }
     }));
+  }
+
+  getCanvasSize(theme, format = 'square') {
+    const selectedTheme = typeof theme === 'string' ? this.getTheme(theme) : theme;
+    const formatKey = format || selectedTheme.canvas.defaultFormat || 'square';
+    return (
+      selectedTheme.canvas.formats[formatKey] ||
+      selectedTheme.canvas.formats[selectedTheme.canvas.defaultFormat] ||
+      selectedTheme.canvas.formats.square
+    );
   }
 
   /**

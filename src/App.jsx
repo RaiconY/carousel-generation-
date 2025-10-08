@@ -14,6 +14,7 @@ function App() {
     setText,
     updateConfig,
     setTheme,
+    setFormat,
     generate,
     copySlide,
     downloadSlide,
@@ -109,6 +110,35 @@ function App() {
                     <div className="theme-name">{theme.name}</div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Формат слайдов</label>
+              <div className="format-selector">
+                <button
+                  className={`format-option ${config.format === 'square' ? 'active' : ''}`}
+                  onClick={() => setFormat('square')}
+                  type="button"
+                >
+                  <div className="format-preview square">
+                    <div className="format-icon">1:1</div>
+                  </div>
+                  <span>Квадрат</span>
+                  <span className="format-size">1080×1080</span>
+                </button>
+
+                <button
+                  className={`format-option ${config.format === 'portrait' ? 'active' : ''}`}
+                  onClick={() => setFormat('portrait')}
+                  type="button"
+                >
+                  <div className="format-preview portrait">
+                    <div className="format-icon">4:5</div>
+                  </div>
+                  <span>Вертикальный</span>
+                  <span className="format-size">1080×1350</span>
+                </button>
               </div>
             </div>
 

@@ -16,13 +16,18 @@ export class RenderEngine {
    * @returns {HTMLCanvasElement} Canvas с отрисованным слайдом
    */
   render(slide, theme, config) {
+    const formatKey = config.format || theme.canvas.defaultFormat || 'square';
+    const canvasSize =
+      theme.canvas.formats[formatKey] ||
+      theme.canvas.formats[theme.canvas.defaultFormat] ||
+      theme.canvas.formats.square;
     const canvas = document.createElement('canvas');
-    canvas.width = theme.canvas.width;
-    canvas.height = theme.canvas.height;
+    canvas.width = canvasSize.width;
+    canvas.height = canvasSize.height;
     const ctx = canvas.getContext('2d');
 
     // 1. Background
-    this.drawBackground(ctx, theme.canvas);
+    this.drawBackground(ctx, theme.canvas, canvasSize);
 
     // 2. Calculate layout
     const layout = this.layoutEngine.calculateLayout(slide, theme, config);
@@ -57,9 +62,11 @@ export class RenderEngine {
     });
   }
 
-  drawBackground(ctx, config) {
+  drawBackground(ctx, config, canvasSize) {
     ctx.fillStyle = config.background;
-    ctx.fillRect(0, 0, config.width, config.height);
+    const width = canvasSize?.width ?? ctx.canvas.width;
+    const height = canvasSize?.height ?? ctx.canvas.height;
+    ctx.fillRect(0, 0, width, height);
   }
 
   drawHeader(ctx, header, theme, config) {
@@ -175,14 +182,22 @@ export class LayoutEngine {
    * Рассчитывает макет слайда
    */
   calculateLayout(slide, theme, config) {
+    const formatKey = config.format || theme.canvas.defaultFormat || 'square';
+    const canvasSize =
+      theme.canvas.formats[formatKey] ||
+      theme.canvas.formats[theme.canvas.defaultFormat] ||
+      theme.canvas.formats.square;
+    const canvasWidth = canvasSize?.width ?? theme.canvas.width;
+    const canvasHeight = canvasSize?.height ?? theme.canvas.height;
+
     const layout = {
       header: {
         username: { x: theme.spacing.padding, y: 138 },
-        slideNumber: { x: 1080 - theme.spacing.padding, y: 138 }
+        slideNumber: { x: canvasWidth - theme.spacing.padding, y: 138 }
       },
       footer: {
-        text: { x: theme.spacing.padding, y: 1020 },
-        arrow: { x: 1080 - theme.spacing.padding, y: 1025 }
+        text: { x: theme.spacing.padding, y: canvasHeight - 60 },
+        arrow: { x: canvasWidth - theme.spacing.padding, y: canvasHeight - 55 }
       }
     };
 
@@ -203,8 +218,8 @@ export class LayoutEngine {
     layout.textBox = {
       x: theme.spacing.padding,
       y: currentY,
-      width: 1080 - (theme.spacing.padding * 2),
-      maxHeight: 1080 - currentY - 150
+      width: canvasWidth - (theme.spacing.padding * 2),
+      maxHeight: canvasHeight - currentY - 150
     };
 
     return layout;
