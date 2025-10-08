@@ -186,14 +186,6 @@ function App() {
                   <div className="stat-value">{stats.slideCount}</div>
                   <div className="stat-label">Слайдов</div>
                 </div>
-                <div className="stat-card">
-                  <div className="stat-value">{stats.charCount}</div>
-                  <div className="stat-label">Символов</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-value">~{stats.timeEstimate}</div>
-                  <div className="stat-label">мин. на пост</div>
-                </div>
               </div>
             )}
 
