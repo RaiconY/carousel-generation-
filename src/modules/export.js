@@ -181,6 +181,7 @@ export class Validator {
       'image/png',
       'image/webp'
     ];
+    this.slideLimitWarning = `Больше ${this.maxSlides} слайдов (Instagram ограничивает карусель ${this.maxSlides} слайдами)`;
   }
 
   /**
@@ -206,9 +207,7 @@ export class Validator {
     // Проверка на количество параграфов
     const paragraphs = text.split('\n\n').filter(p => p.trim());
     if (paragraphs.length > this.maxSlides) {
-      warnings.push(
-        `Больше ${this.maxSlides} слайдов (Instagram ограничивает карусель ${this.maxSlides} слайдами)`
-      );
+      warnings.push(this.slideLimitWarning);
     }
 
     // Проверка на подозрительные символы
@@ -363,6 +362,38 @@ export class Validator {
       .replace(/[<>]/g, '')           // Удаляем потенциально опасные символы
       .replace(/javascript:/gi, '')    // Удаляем JS инъекции
       .trim();
+  }
+
+  adjustSlideWarnings(validation, slideCount) {
+    if (!validation) {
+      return validation;
+    }
+
+    const shouldWarn = slideCount > this.maxSlides;
+    const warning = this.slideLimitWarning;
+
+    const updateWarnings = (warnings = []) => {
+      const filtered = warnings.filter(message => message !== warning);
+      if (shouldWarn) {
+        filtered.push(warning);
+      }
+      return filtered;
+    };
+
+    const updatedText = validation.text
+      ? {
+          ...validation.text,
+          warnings: updateWarnings(validation.text.warnings)
+        }
+      : validation.text;
+
+    const updatedWarnings = updateWarnings(validation.warnings);
+
+    return {
+      ...validation,
+      warnings: updatedWarnings,
+      text: updatedText
+    };
   }
 }
 
