@@ -97,11 +97,11 @@ export const useCarouselStore = create(
        */
       generate: async () => {
         const { text, config } = get();
-        
+
         // Валидация
-        const validation = validator.validateAll(text, [], config);
+        let validation = validator.validateAll(text, [], config);
         set({ validation });
-        
+
         if (!validation.isValid) {
           return;
         }
@@ -112,6 +112,9 @@ export const useCarouselStore = create(
           // Парсинг текста
           const slides = parser.parse(text);
           set({ slides });
+
+          validation = validator.adjustSlideWarnings(validation, slides.length);
+          set({ validation });
 
           // Получение темы
           const theme = themeSystem.getTheme(config.theme);
