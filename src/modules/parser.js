@@ -1,6 +1,11 @@
 /**
- * Text Parser Module
+ * Text Parser Module - FIXED VERSION v1.1
  * Преобразует текст в структурированные данные для слайдов
+ * 
+ * CHANGELOG v1.1:
+ * - Исправлена проблема с группировкой: максимум 2 параграфа на слайд
+ * - Добавлены настройки maxParagraphsPerSlide и shortParagraphThreshold
+ * - Улучшена логика разделения длинных и коротких параграфов
  */
 
 export class TextParser {
@@ -8,6 +13,10 @@ export class TextParser {
     this.maxCharsPerSlide = options.maxCharsPerSlide || 400;
     this.groupParagraphs = options.groupParagraphs !== false;
     this.normalizeTypography = options.normalizeTypography !== false;
+    
+    // НОВЫЕ ПАРАМЕТРЫ (v1.1)
+    this.maxParagraphsPerSlide = options.maxParagraphsPerSlide || 2;
+    this.shortParagraphThreshold = options.shortParagraphThreshold || 150;
   }
 
   /**
@@ -78,7 +87,7 @@ export class TextParser {
   }
 
   /**
-   * Группирует короткие слайды вместе
+   * Группирует короткие слайды вместе - ИСПРАВЛЕННАЯ ВЕРСИЯ (v1.1)
    */
   groupSlides(slides) {
     const grouped = [];
@@ -99,8 +108,13 @@ export class TextParser {
         return;
       }
 
-      // Проверяем, влезает ли в группу
-      if (currentLength + slideLength <= this.maxCharsPerSlide) {
+      // ИСПРАВЛЕНИЕ (v1.1): Ограничиваем количество параграфов на слайд
+      const canAddToGroup = 
+        currentGroup.length < this.maxParagraphsPerSlide && // Максимум N параграфов
+        currentLength + slideLength <= this.maxCharsPerSlide && // Проверка длины
+        slideLength < this.shortParagraphThreshold; // Только короткие параграфы
+
+      if (canAddToGroup) {
         currentGroup.push(slide);
         currentLength += slideLength;
       } else {
