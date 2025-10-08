@@ -33,7 +33,8 @@ export const useCarouselStore = create(
       config: {
         username: '@dengi_market',
         footer: 'ваш любимый ломбард',
-        theme: 'dengi_market'
+        theme: 'dengi_market',
+        format: 'square'
       },
       
       // UI состояние
@@ -79,6 +80,15 @@ export const useCarouselStore = create(
         themeSystem.setTheme(themeId);
         set((state) => ({
           config: { ...state.config, theme: themeId }
+        }));
+      },
+
+      /**
+       * Установить формат
+       */
+      setFormat: (format) => {
+        set((state) => ({
+          config: { ...state.config, format: format || 'square' }
         }));
       },
 
