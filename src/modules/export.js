@@ -174,7 +174,7 @@ export class Validator {
   constructor(options = {}) {
     this.maxTextLength = options.maxTextLength || 5000;
     this.minTextLength = options.minTextLength || 10;
-    this.maxSlides = options.maxSlides || 10;
+    this.maxSlides = options.maxSlides || 20;
     this.maxImageSize = options.maxImageSize || 10 * 1024 * 1024; // 10MB
     this.allowedImageTypes = options.allowedImageTypes || [
       'image/jpeg',
