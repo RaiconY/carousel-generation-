@@ -76,10 +76,18 @@ export class RenderEngine {
   }
 
   drawBadge(ctx, badge, theme) {
-    // Measure text для правильной ширины бэджа
-    ctx.font = `${theme.fonts.badge.weight} ${theme.fonts.badge.size}px ${theme.fonts.badge.family}`;
-    const textWidth = ctx.measureText(badge.text).width;
-    const badgeWidth = Math.min(900, textWidth + (theme.spacing.badgePadding * 2));
+    const font = `${theme.fonts.badge.weight} ${theme.fonts.badge.size}px ${theme.fonts.badge.family}`;
+    const lineHeight = theme.fonts.badge.size * (theme.spacing.badgeLineHeight || 1.1);
+    const lines = (badge.lines && badge.lines.length > 0) ? badge.lines : [badge.text];
+    ctx.font = font;
+    const maxLineWidth = lines.reduce((max, line) => {
+      const { width } = ctx.measureText(line);
+      return Math.max(max, width);
+    }, 0);
+    const badgeWidth = badge.width || Math.min(
+      900,
+      maxLineWidth + (theme.spacing.badgePadding * 2)
+    );
 
     // Rectangle
     ctx.fillStyle = theme.colors.badge;
@@ -87,8 +95,17 @@ export class RenderEngine {
 
     // Text
     ctx.fillStyle = theme.colors.badgeText;
+    ctx.font = font;
     ctx.textAlign = 'left';
-    ctx.fillText(badge.text, badge.x + theme.spacing.badgePadding, badge.y + 70);
+    ctx.textBaseline = 'top';
+
+    const verticalPadding = Math.max((badge.height - (lines.length * lineHeight)) / 2, 0);
+    let currentY = badge.y + verticalPadding;
+
+    lines.forEach(line => {
+      ctx.fillText(line, badge.x + theme.spacing.badgePadding, currentY);
+      currentY += lineHeight;
+    });
   }
 
   drawBodyText(ctx, text, textBox, theme) {
@@ -173,13 +190,13 @@ export class LayoutEngine {
 
     // Badge layout (если есть выделенный текст)
     if (slide.highlightedText) {
+      const badgeLayout = this.calculateBadgeLayout(slide.highlightedText, theme);
       layout.badge = {
         x: 90,
         y: currentY,
-        height: theme.spacing.badgeHeight,
-        text: slide.highlightedText.toUpperCase()
+        ...badgeLayout
       };
-      currentY += theme.spacing.badgeHeight + 40;
+      currentY += badgeLayout.height + 40;
     }
 
     // Text box layout
@@ -191,6 +208,42 @@ export class LayoutEngine {
     };
 
     return layout;
+  }
+
+  calculateBadgeLayout(text, theme) {
+    const badgeText = text.toUpperCase();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const font = `${theme.fonts.badge.weight} ${theme.fonts.badge.size}px ${theme.fonts.badge.family}`;
+    const maxBadgeWidth = 900;
+    const horizontalPadding = theme.spacing.badgePadding;
+    const maxTextWidth = maxBadgeWidth - (horizontalPadding * 2);
+
+    ctx.font = font;
+
+    let lines = this.wrapText(ctx, badgeText, maxTextWidth, font);
+
+    if (lines.length === 0) {
+      lines = [badgeText];
+    }
+
+    ctx.font = font;
+    const maxLineWidth = lines.reduce((max, line) => {
+      const { width } = ctx.measureText(line);
+      return Math.max(max, width);
+    }, 0);
+
+    const badgeWidth = Math.min(maxBadgeWidth, maxLineWidth + (horizontalPadding * 2));
+    const lineHeight = theme.fonts.badge.size * (theme.spacing.badgeLineHeight || 1.1);
+    const extraLines = Math.max(0, lines.length - 1);
+    const height = theme.spacing.badgeHeight + (extraLines * lineHeight);
+
+    return {
+      text: badgeText,
+      lines,
+      width: badgeWidth,
+      height
+    };
   }
 
   /**
