@@ -36,16 +36,35 @@ export class ExportManager {
   }
 
   /**
-   * Скачивание одного файла
+   * Скачивание одного файла - ИСПРАВЛЕННАЯ ВЕРСИЯ
    */
-  download(canvas, filename) {
-    const url = this.toDataURL(canvas);
-    const link = document.createElement('a');
-    link.download = filename;
-    link.href = url;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  async download(canvas, filename) {
+    try {
+      // Конвертируем canvas в blob для лучшей совместимости
+      const blob = await this.toBlob(canvas, 'png');
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = url;
+      
+      // Добавляем в DOM для Safari
+      document.body.appendChild(link);
+      
+      // Триггерим скачивание
+      link.click();
+      
+      // Небольшая задержка перед очисткой для надежности
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url); // Освобождаем память
+      }, 100);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Download error:', error);
+      return { success: false, error: error.message };
+    }
   }
 
   /**
@@ -53,9 +72,9 @@ export class ExportManager {
    */
   async downloadBatch(canvases, basename = 'slide') {
     for (let i = 0; i < canvases.length; i++) {
-      this.download(canvases[i], `${basename}-${i + 1}.png`);
+      await this.download(canvases[i], `${basename}-${i + 1}.png`);
       // Небольшая задержка между скачиваниями
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
   }
 
@@ -91,14 +110,15 @@ export class ExportManager {
     link.href = url;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
     
-    // Освобождаем память
-    URL.revokeObjectURL(url);
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }, 100);
   }
 
   /**
-   * Экспорт в PDF (требует библиотеку jsPDF)
+   * Экспорт в PDF (требует библиотеку jspdf)
    */
   async exportToPDF(canvases, filename = 'carousel.pdf') {
     if (typeof jspdf === 'undefined') {
@@ -359,8 +379,8 @@ export class Validator {
    */
   sanitize(text) {
     return text
-      .replace(/[<>]/g, '')           // Удаляем потенциально опасные символы
-      .replace(/javascript:/gi, '')    // Удаляем JS инъекции
+      .replace(/[<>]/g, '')             // Удаляем потенциально опасные символы
+      .replace(/javascript:/gi, '')     // Удаляем JS инъекции
       .trim();
   }
 
